@@ -51,7 +51,7 @@
             if (strlen($tmp2) > 0 && substr($tmp2, 0, 1) != '#') {
                 $tmp3 = explode('|', $tmp2, 2);
                 if (count($tmp3) == 2) {
-                    globals::$stalk[ $tmp3[ 0 ] ] = trim($tmp3[ 1 ]);
+                    globals::$stalk[$tmp3[0] ] = trim($tmp3[1]);
                 } else {
                     print "Skipping auto stalk entry: $tmp2\n";
                 }
@@ -62,7 +62,7 @@
             if (strlen($tmp2) > 0 && substr($tmp2, 0, 1) != '#') {
                 $tmp3 = explode('|', $tmp2, 2);
                 if (count($tmp3) == 2) {
-                    globals::$edit[ $tmp3[ 0 ] ] = trim($tmp3[ 1 ]);
+                    globals::$edit[$tmp3[0] ] = trim($tmp3[1]);
                 } else {
                     print "Skipping auto edit entry: $tmp2\n";
                 }

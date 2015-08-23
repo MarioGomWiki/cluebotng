@@ -34,14 +34,14 @@
     {
         global $convert;
 
-        return $convert[ strtolower(str_replace('_', ' ', $ns)) ];
+        return $convert[strtolower(str_replace('_', ' ', $ns))];
     }
     function namespace2name($nsid)
     {
         global $convert;
         $convertFlipped = array_flip($convert);
 
-        return ucfirst($convertFlipped[ $nsid ]);
+        return ucfirst($convertFlipped[$nsid]);
     }
     function parseFeed($feed)
     {
@@ -53,16 +53,16 @@
             )
         ) {
             $change = array(
-                'namespace' => $m[ 1 ] ? $m[ 1 ] : 'Main:' ,
-                'namespaceid' => namespace2id($m[ 1 ] ? substr($m[ 1 ], 0, -1) : 'Main'),
-                'title' => $m[ 5 ],
-                'flags' => $m[ 6 ],
-                'url' => $m[ 7 ],
-                'revid' => $m[ 8 ],
-                'old_revid' => $m[ 9 ],
-                'user' => $m[ 10 ],
-                'length' => $m[ 12 ],
-                'comment' => $m[ 13 ],
+                'namespace' => $m[1] ? $m[1] : 'Main:' ,
+                'namespaceid' => namespace2id($m[1] ? substr($m[1], 0, -1) : 'Main'),
+                'title' => $m[5],
+                'flags' => $m[6],
+                'url' => $m[7],
+                'revid' => $m[8],
+                'old_revid' => $m[9],
+                'user' => $m[10],
+                'length' => $m[12],
+                'comment' => $m[13],
                 'timestamp' => time(),
             );
 
@@ -137,7 +137,7 @@
         $doc = new DOMDocument('1.0');
         $root = $doc->createElement('WPEditSet');
         $doc->appendChild($root);
-        if (isset($data[ 0 ])) {
+        if (isset($data[0])) {
             foreach ($data as $entry) {
                 $root->appendChild(xmlizePart($doc, 'WPEdit', $entry));
             }
@@ -157,26 +157,26 @@
     {
         $startTime = microtime(true);
         $urls = array(
-            'https://en.wikipedia.org/w/api.php?action=query&rawcontinue=1&prop=revisions&titles='.urlencode(($feedData[ 'namespaceid' ] == 0 ? '' : $feedData[ 'namespace' ].':').$feedData[ 'title' ]).'&rvstartid='.$feedData[ 'revid' ].'&rvlimit=2&rvprop=timestamp|user|content&format=php',
+            'https://en.wikipedia.org/w/api.php?action=query&rawcontinue=1&prop=revisions&titles='.urlencode(($feedData['namespaceid'] == 0 ? '' : $feedData['namespace'].':').$feedData['title']).'&rvstartid='.$feedData['revid'].'&rvlimit=2&rvprop=timestamp|user|content&format=php',
         );
         list($api) = getUrlsInParallel($urls);
-        $api = current($api[ 'query' ][ 'pages' ]);
-        $cb = getCbData($feedData[ 'user' ], $feedData[ 'namespaceid' ], $feedData[ 'title' ], $feedData[ 'timestamp' ]);
+        $api = current($api['query']['pages']);
+        $cb = getCbData($feedData['user'], $feedData['namespaceid'], $feedData['title'], $feedData['timestamp']);
         if (
             !(
-                isset($cb[ 'user_edit_count' ])
-                and isset($cb[ 'user_distinct_pages' ])
-                and isset($cb[ 'user_warns' ])
-                and isset($api[ 'revisions' ][ 1 ][ 'user' ])
-                and isset($cb[ 'user_reg_time' ])
-                and isset($cb[ 'common' ][ 'page_made_time' ])
-                and isset($cb[ 'common' ][ 'creator' ])
-                and isset($cb[ 'common' ][ 'num_recent_edits' ])
-                and isset($cb[ 'common' ][ 'num_recent_reversions' ])
-                and isset($api[ 'revisions' ][ 0 ][ 'timestamp' ])
-                and isset($api[ 'revisions' ][ 0 ][ '*' ])
-                and isset($api[ 'revisions' ][ 1 ][ 'timestamp' ])
-                and isset($api[ 'revisions' ][ 1 ][ '*' ])
+                isset($cb['user_edit_count'])
+                and isset($cb['user_distinct_pages'])
+                and isset($cb['user_warns'])
+                and isset($api['revisions'][1]['user'])
+                and isset($cb['user_reg_time'])
+                and isset($cb['common']['page_made_time'])
+                and isset($cb['common']['creator'])
+                and isset($cb['common']['num_recent_edits'])
+                and isset($cb['common']['num_recent_reversions'])
+                and isset($api['revisions'][0]['timestamp'])
+                and isset($api['revisions'][0]['*'])
+                and isset($api['revisions'][1]['timestamp'])
+                and isset($api['revisions'][1]['*'])
             )
         ) {
             print "\n".date('d/m/Y H:i:s')."\n";
@@ -187,34 +187,34 @@
         }
         $data = array(
             'EditType' => 'change',
-            'EditID' => $feedData[ 'revid' ],
-            'comment' => $feedData[ 'comment' ],
-            'user' => $feedData[ 'user' ],
-            'user_edit_count' => $cb[ 'user_edit_count' ],
-            'user_distinct_pages' => $cb[ 'user_distinct_pages' ],
-            'user_warns' => $cb[ 'user_warns' ],
-            'prev_user' => $api[ 'revisions' ][ 1 ][ 'user' ],
-            'user_reg_time' => $cb[ 'user_reg_time' ],
+            'EditID' => $feedData['revid'],
+            'comment' => $feedData['comment'],
+            'user' => $feedData['user'],
+            'user_edit_count' => $cb['user_edit_count'],
+            'user_distinct_pages' => $cb['user_distinct_pages'],
+            'user_warns' => $cb['user_warns'],
+            'prev_user' => $api['revisions'][1]['user'],
+            'user_reg_time' => $cb['user_reg_time'],
             'common' => array(
-                'page_made_time' => $cb[ 'common' ][ 'page_made_time' ],
-                'title' => $feedData[ 'title' ],
-                'namespace' => $feedData[ 'namespace' ],
-                'creator' => $cb[ 'common' ][ 'creator' ],
-                'num_recent_edits' => $cb[ 'common' ][ 'num_recent_edits' ],
-                'num_recent_reversions' => $cb[ 'common' ][ 'num_recent_reversions' ],
+                'page_made_time' => $cb['common']['page_made_time'],
+                'title' => $feedData['title'],
+                'namespace' => $feedData['namespace'],
+                'creator' => $cb['common']['creator'],
+                'num_recent_edits' => $cb['common']['num_recent_edits'],
+                'num_recent_reversions' => $cb['common']['num_recent_reversions'],
             ),
             'current' => array(
-                'minor' => (stripos($feedData[ 'flags' ], 'm') === false) ? 'false' : 'true',
-                'timestamp' => strtotime($api[ 'revisions' ][ 0 ][ 'timestamp' ]),
-                'text' => $api[ 'revisions' ][ 0 ][ '*' ],
+                'minor' => (stripos($feedData['flags'], 'm') === false) ? 'false' : 'true',
+                'timestamp' => strtotime($api['revisions'][0]['timestamp']),
+                'text' => $api['revisions'][0]['*'],
             ),
             'previous' => array(
-                'timestamp' => strtotime($api[ 'revisions' ][ 1 ][ 'timestamp' ]),
-                'text' => $api[ 'revisions' ][ 1 ][ '*' ],
+                'timestamp' => strtotime($api['revisions'][1]['timestamp']),
+                'text' => $api['revisions'][1]['*'],
             ),
         );
-        $feedData[ 'startTime' ] = $startTime;
-        $feedData[ 'all' ] = $data;
+        $feedData['startTime'] = $startTime;
+        $feedData['all'] = $data;
 
         return $feedData;
     }

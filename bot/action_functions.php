@@ -36,11 +36,11 @@
                         'August' => 8, 'September' => 9, 'October' => 10,
                         'November' => 11, 'December' => 12,
                     );
-                    if ($m[ 1 ] == 'Blatantvandal (serious warning)') {
-                        $m[ 2 ] = 4;
+                    if ($m[1] == 'Blatantvandal (serious warning)') {
+                        $m[2] = 4;
                     }
-                    if ((time() - gmmktime($m[ 4 ], $m[ 5 ], 0, $month[ $m[ 7 ] ], $m[ 6 ], $m[ 8 ])) <= (2 * 24 * 60 * 60)) {
-                        if ($m[ 2 ] > $warning) {
+                    if ((time() - gmmktime($m[4], $m[5], 0, $month[ $m[7] ], $m[6], $m[8])) <= (2 * 24 * 60 * 60)) {
+                        if ($m[2] > $warning) {
                             $warning = $m[2];
                         }
                     }
@@ -52,14 +52,14 @@
         private static function aiv($change, $report)
         {
             $aivdata = API::$q->getpage('Wikipedia:Administrator_intervention_against_vandalism/TB2');
-            if (!preg_match('/'.preg_quote($change[ 'user' ], '/').'/i', $aivdata)) {
-                Relay::reportUserToAVI($change[ 'user' ]);
+            if (!preg_match('/'.preg_quote($change['user'], '/').'/i', $aivdata)) {
+                Relay::reportUserToAVI($change['user']);
                 API::$a->edit(
                     'Wikipedia:Administrator_intervention_against_vandalism/TB2',
                     $aivdata."\n\n"
-                    .'* {{'.((long2ip(ip2long($change[ 'user' ])) == $change[ 'user' ]) ? 'IPvandal' : 'Vandal').'|'.$change[ 'user' ].'}}'
+                    .'* {{'.((long2ip(ip2long($change['user'])) == $change['user']) ? 'IPvandal' : 'Vandal').'|'.$change['user'].'}}'
                     .' - '.$report.' (Automated) ~~~~'."\n",
-                    'Automatically reporting [[Special:Contributions/'.$change[ 'user' ].']].'.
+                    'Automatically reporting [[Special:Contributions/'.$change['user'].']].'.
                     ' (bot)',
                     false,
                     false
@@ -68,26 +68,26 @@
         }
         private static function warn($change, $report, $content, $warning)
         {
-            echo 'Warning '.$change[ 'user' ].' ...';
+            echo 'Warning '.$change['user'].' ...';
             $ret = API::$a->edit(
-                'User talk:'.$change[ 'user' ],
+                'User talk:'.$change['user'],
                 $content."\n\n"
                 .'{{subst:User:'.config::$user.'/Warnings/Warning'
                 .'|1='.$warning
-                .'|2='.str_replace('File:', ':File:', $change[ 'title' ])
+                .'|2='.str_replace('File:', ':File:', $change['title'])
                 .'|3='.$report
-                .' <!{{subst:ns:0}}-- MySQL ID: '.$change[ 'mysqlid' ].' --{{subst:ns:0}}>'
-                .'|4='.$change[ 'mysqlid' ]
+                .' <!{{subst:ns:0}}-- MySQL ID: '.$change['mysqlid'].' --{{subst:ns:0}}>'
+                .'|4='.$change['mysqlid']
                 .'}} ~~~~'
                 ."\n",
-                'Warning [[Special:Contributions/'.$change[ 'user' ].'|'.$change[ 'user' ].']] - #'.$warning,
+                'Warning [[Special:Contributions/'.$change['user'].'|'.$change['user'].']] - #'.$warning,
                 false,
                 false
             ); /* Warn the user */
         }
         public static function doWarn($change, $report)
         {
-            $warning = self::getWarningLevel($change[ 'user' ], $tpcontent) + 1;
+            $warning = self::getWarningLevel($change['user'], $tpcontent) + 1;
             if (!config::$dry) {
                 if ($warning == 5) { /* Report them if they have been warned 4 times. */
                     self::aiv($change, $report);
@@ -99,28 +99,28 @@
         }
         public static function doRevert($change)
         {
-            $rev = API::$a->revisions($change[ 'title' ], 5, 'older', false, null, true, true);
+            $rev = API::$a->revisions($change['title'], 5, 'older', false, null, true, true);
             $revid = 0;
-            $rbtok = $rev[ 0 ][ 'rollbacktoken' ];
+            $rbtok = $rev[0]['rollbacktoken'];
             foreach ($rev as $revdata) {
-                if ($revdata[ 'user' ] != $change[ 'user' ]) {
-                    $revid = $revdata[ 'revid' ];
+                if ($revdata['user'] != $change['user']) {
+                    $revid = $revdata['revid'];
                     break;
                 }
             }
-            if (($revdata[ 'user' ] == config::$user) or (in_array($revdata[ 'user' ], explode(',', config::$friends)))) {
+            if (($revdata['user'] == config::$user) or (in_array($revdata['user'], explode(',', config::$friends)))) {
                 return false;
             }
             if (config::$dry) {
                 return true;
             }
             $rbret = API::$a->rollback(
-                $change[ 'title' ],
-                $change[ 'user' ],
-                'Reverting possible vandalism by [[Special:Contribs/'.$change[ 'user' ].'|'.$change[ 'user' ].']] '.
-                'to '.(($revid == 0) ? 'older version' : 'version by '.$revdata[ 'user' ]).'. '.
+                $change['title'],
+                $change['user'],
+                'Reverting possible vandalism by [[Special:Contribs/'.$change['user'].'|'.$change['user'].']] '.
+                'to '.(($revid == 0) ? 'older version' : 'version by '.$revdata['user']).'. '.
                 '[[WP:CBFP|Report False Positive?]]. '.
-                'Thanks, [[WP:CBNG|'.config::$user.']]. ('.$change[ 'mysqlid' ].') (Bot)',
+                'Thanks, [[WP:CBNG|'.config::$user.']]. ('.$change['mysqlid'].') (Bot)',
                 $rbtok
             );
 
@@ -128,7 +128,7 @@
         }
         public static function findAndParseBots($change)
         {
-            $text = $change[ 'all' ][ 'current' ][ 'text' ];
+            $text = $change['all']['current']['text'];
             if (stripos('{{nobots}}', $text) !== false) {
                 return false;
             }
@@ -138,7 +138,7 @@
                 return false;
             }
             if (preg_match('/\{\{bots\s*\|\s*allow\s*\=([^}]*)\}\}/i', $text, $matches)) {
-                if (!preg_match('/('.$botname.'|\*)/i', $matches[ 1 ])) {
+                if (!preg_match('/('.$botname.'|\*)/i', $matches[1])) {
                     return false;
                 }
             }
@@ -157,7 +157,10 @@
             if (!preg_match('/(yes|enable|true)/iS', globals::$run)) {
                 return array(false, 'Run disabled');
             }
-            if ($change[ 'user' ] == config::$user) {
+            if (empty($change['mysqlid'])) {
+                return array(false, 'Could not get revert id');
+            }
+            if ($change['user'] == config::$user) {
                 return array(false, 'User is myself');
             }
             if (config::$angry) {
@@ -166,26 +169,26 @@
             if ((time() - globals::$tfas) >= 1800) {
                 if (preg_match('/\(\'\'\'\[\[([^|]*)\|more...\]\]\'\'\'\)/iU', API::$q->getpage('Wikipedia:Today\'s featured article/'.date('F j, Y')), $tfam)) {
                     globals::$tfas = time();
-                    globals::$tfa = $tfam[ 1 ];
+                    globals::$tfa = $tfam[1];
                 }
             }
             if (!self::findAndParseBots($change)) {
                 return array(false, 'Exclusion compliance');
             }
-            if ($change[ 'all' ][ 'user' ] == $change[ 'all' ][ 'common' ][ 'creator' ]) {
+            if ($change['all']['user'] == $change['all']['common']['creator']) {
                 return array(false, 'User is creator');
             }
-            if ($change[ 'all' ][ 'user_edit_count' ] > 50) {
-                if ($change[ 'all' ][ 'user_warns' ] / $change[ 'all' ][ 'user_edit_count' ] < 0.1) {
+            if ($change['all']['user_edit_count'] > 50) {
+                if ($change['all']['user_warns'] / $change['all']['user_edit_count'] < 0.1) {
                     return array(false, 'User has edit count');
                 } else {
                     $reason = 'User has edit count, but warns > 10%';
                 }
             }
-            if (globals::$tfa == $change[ 'title' ]) {
+            if (globals::$tfa == $change['title']) {
                 return array(true, 'Angry-reverting on TFA');
             }
-            if (preg_match('/\* \[\[('.preg_quote($change[ 'title' ], '/').')\]\] \- .*/i', globals::$aoptin)) {
+            if (preg_match('/\* \[\[('.preg_quote($change['title'], '/').')\]\] \- .*/i', globals::$aoptin)) {
                 Relay::angryRevert($change);
 
                 return array(true, 'Angry-reverting on angry-optin');

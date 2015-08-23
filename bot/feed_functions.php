@@ -49,21 +49,21 @@
             if ($d === null) {
                 return;
             }
-            if ($d[ 'type' ] == 'direct') {
-                switch ($d[ 'command' ]) {
+            if ($d['type'] == 'direct') {
+                switch ($d['command']) {
                     case 'ping':
-                        self::send('PONG :'.$d[ 'pieces' ][ 0 ]);
+                        self::send('PONG :'.$d['pieces'][0]);
                         break;
                 }
             } else {
-                switch ($d[ 'command' ]) {
+                switch ($d['command']) {
                     case '376':
                     case '422':
                         self::send('JOIN '.self::$channel);
                         break;
                     case 'privmsg':
-                        if (strtolower($d[ 'target' ]) == self::$channel) {
-                            $rawmessage = $d[ 'pieces' ][ 0 ];
+                        if (strtolower($d['target']) == self::$channel) {
+                            $rawmessage = $d['pieces'][0];
                             $message = str_replace("\002", '', $rawmessage);
                             $message = preg_replace('/\003(\d\d?(,\d\d?)?)?/', '', $message);
                             $data = parseFeed($message);
@@ -72,14 +72,14 @@
                                 return;
                             }
 
-                            if (stripos('N', $data[ 'flags' ]) !== false) {
+                            if (stripos('N', $data['flags']) !== false) {
                                 Relay::skippedEdit($data, 'new_arcticle');
 
                                 return;
                             }
 
                             Relay::stalkEdit($data);
-                            switch ($data[ 'namespace' ].$data[ 'title' ]) {
+                            switch ($data['namespace'].$data['title']) {
                                 case 'User:'.config::$user.'/Run':
                                     globals::$run = API::$q->getpage('User:'.config::$user.'/Run');
                                     break;
@@ -94,8 +94,8 @@
                                     break;
                             }
                             if (
-                                ($data[ 'namespace' ] != 'Main:')
-                                and ((!preg_match('/\* \[\[('.preg_quote($data[ 'namespace' ].$data[ 'title' ], '/').')\]\] \- .*/i', globals::$optin)))
+                                ($data['namespace'] != 'Main:')
+                                and ((!preg_match('/\* \[\[('.preg_quote($data['namespace'].$data['title'], '/').')\]\] \- .*/i', globals::$optin)))
                             ) {
                                 self::bail($data, 'Outside of valid namespaces');
 

@@ -28,21 +28,21 @@
             $return = array();
             $i = 0;
             $quotes = false;
-            if ($message[ $i ] == ':') {
-                $return[ 'type' ] = 'relayed';
+            if ($message[$i] == ':') {
+                $return['type'] = 'relayed';
                 ++$i;
             } else {
-                $return[ 'type' ] = 'direct';
+                $return['type'] = 'direct';
             }
-            $return[ 'rawpieces' ] = array();
+            $return['rawpieces'] = array();
             $temp = '';
             for (; $i < strlen($message); ++$i) {
-                if ($quotes and $message[ $i ] != '"') {
-                    $temp .= $message[ $i ];
+                if ($quotes and $message[$i] != '"') {
+                    $temp .= $message[$i];
                 } else {
-                    switch ($message[ $i ]) {
+                    switch ($message[$i]) {
                         case ' ':
-                            $return[ 'rawpieces' ][] = $temp;
+                            $return['rawpieces'][] = $temp;
                             $temp = '';
                             break;
                         case '"':
@@ -53,30 +53,30 @@
                         case ':':
                             if ($temp == '') {
                                 ++$i;
-                                $return[ 'rawpieces' ][] = substr($message, $i);
+                                $return['rawpieces'][] = substr($message, $i);
                                 $i = strlen($message);
                                 break;
                             }
                         default:
-                            $temp .= $message[ $i ];
+                            $temp .= $message[$i];
                     }
                 }
             }
             if ($temp != '') {
-                $return[ 'rawpieces' ][] = $temp;
+                $return['rawpieces'][] = $temp;
             }
-            if ($return[ 'type' ] == 'relayed') {
-                $return[ 'source' ] = $return[ 'rawpieces' ][ 0 ];
-                $return[ 'command' ] = strtolower($return[ 'rawpieces' ][ 1 ]);
-                $return[ 'target' ] = $return[ 'rawpieces' ][ 2 ];
-                $return[ 'pieces' ] = array_slice($return[ 'rawpieces' ], 3);
+            if ($return['type'] == 'relayed') {
+                $return['source'] = $return['rawpieces'][0];
+                $return['command'] = strtolower($return['rawpieces'][1]);
+                $return['target'] = $return['rawpieces'][2];
+                $return['pieces'] = array_slice($return['rawpieces'], 3);
             } else {
-                $return[ 'source' ] = 'Server';
-                $return[ 'command' ] = strtolower($return[ 'rawpieces' ][ 0 ]);
-                $return[ 'target' ] = 'You';
-                $return[ 'pieces' ] = array_slice($return[ 'rawpieces' ], 1);
+                $return['source'] = 'Server';
+                $return['command'] = strtolower($return['rawpieces'][0]);
+                $return['target'] = 'You';
+                $return['pieces'] = array_slice($return['rawpieces'], 1);
             }
-            $return[ 'raw' ] = $message;
+            $return['raw'] = $message;
 
             return $return;
         }

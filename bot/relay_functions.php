@@ -53,13 +53,13 @@ class Relay
         $stalkchannel = array();
 
         foreach (globals::$stalk as $key => $value) {
-            if (myfnmatch(str_replace('_', ' ', $key), str_replace('_', ' ', $data[ 'user' ]))) {
+            if (myfnmatch(str_replace('_', ' ', $key), str_replace('_', ' ', $data['user']))) {
                 $stalkchannel = array_merge($stalkchannel, explode(',', $value));
             }
         }
 
         foreach (globals::$edit as $key => $value) {
-            if (myfnmatch(str_replace('_', ' ', $key), str_replace('_', ' ', ($data[ 'namespace' ] == 'Main:' ? '' : $data[ 'namespace' ]).$data[ 'title' ]))) {
+            if (myfnmatch(str_replace('_', ' ', $key), str_replace('_', ' ', ($data['namespace'] == 'Main:' ? '' : $data['namespace']).$data['title']))) {
                 $stalkchannel = array_merge($stalkchannel, explode(',', $value));
             }
         }
@@ -85,7 +85,7 @@ class Relay
     private static function warnUser($edit, $level)
     {
         $data = array(
-            'user' => $edit[ 'user' ],
+            'user' => $edit['user'],
             'level' => $level,
             'edit' => $edit,
         );

@@ -293,25 +293,25 @@
                 $x = unserialize($x);
                 foreach ($x['query']['pages'] as $y) {
                     $tokens = array();
-                    if (isset($y[ 'edittoken' ])) {
+                    if (isset($y['edittoken'])) {
                         $tokens['edittoken'] = $y['edittoken'];
                     }
-                    if (isset($y[ 'deletetoken' ])) {
+                    if (isset($y['deletetoken'])) {
                         $tokens['deletetoken'] = $y['deletetoken'];
                     }
-                    if (isset($y[ 'protecttoken' ])) {
+                    if (isset($y['protecttoken'])) {
                         $tokens['protecttoken'] = $y['protecttoken'];
                     }
-                    if (isset($y[ 'movetoken' ])) {
+                    if (isset($y['movetoken'])) {
                         $tokens['movetoken'] = $y['movetoken'];
                     }
-                    if (isset($y[ 'blocktoken' ])) {
+                    if (isset($y['blocktoken'])) {
                         $tokens['blocktoken'] = $y['blocktoken'];
                     }
-                    if (isset($y[ 'unblocktoken' ])) {
+                    if (isset($y['unblocktoken'])) {
                         $tokens['unblocktoken'] = $y['unblocktoken'];
                     }
-                    if (isset($y[ 'emailtoken' ])) {
+                    if (isset($y['emailtoken'])) {
                         $tokens['emailtoken'] = $y['emailtoken'];
                     }
                     $this->tokencache[$title] = array(
@@ -808,7 +808,7 @@
             $x = unserialize($x);
             var_export($x);
 
-            return (isset($x['rollback']['summary']) and isset($x[ 'rollback' ][ 'revid' ]) and $x[ 'rollback' ][ 'revid' ])
+            return (isset($x['rollback']['summary']) and isset($x['rollback']['revid']) and $x['rollback']['revid'])
                 ? true
                 : false;
         }
@@ -943,7 +943,7 @@
             $post['wpAutoSummary'] = $m[1];
             if ($maxlag != null) {
                 $x = $this->http->post($this->indexurl.'?title='.urlencode($page).'&action=submit&maxlag='.urlencode($maxlag).'&bot='.(($bot == true) ? '1' : '0'), $post);
-                if (preg_match('/Waiting for ([^ ]*): ([0-9.-]+) seconds lagged/S', $x, $lagged)) {
+                if (preg_match('/Waiting for ([^]*): ([0-9.-]+) seconds lagged/S', $x, $lagged)) {
                     sleep(10);
                     if ($mlkg != true) {
                         return false;

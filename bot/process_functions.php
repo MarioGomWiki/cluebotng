@@ -22,17 +22,17 @@
     {
         public static function processEditThread($change)
         {
-            $change[ 'edit_status' ] = 'not_reverted';
+            $change['edit_status'] = 'not_reverted';
             $s = null;
-            $change[ 'edit_score' ] = &$s;
-            if (!in_array('all', $change) || !isVandalism($change[ 'all' ], $s)) {
+            $change['edit_score'] = &$s;
+            if (!in_array('all', $change) || !isVandalism($change['all'], $s)) {
                 Relay::skippedVandalism($change, 'below_threashold');
 
                 return;
             }
 
-            echo 'Is '.$change[ 'user' ].' whitelisted ?'."\n";
-            if (Action::isWhitelisted($change[ 'user' ])) {
+            echo 'Is '.$change['user'].' whitelisted ?'."\n";
+            if (Action::isWhitelisted($change['user'])) {
                 Relay::skippedVandalism($change, 'whitelisted');
 
                 return;
@@ -56,17 +56,17 @@
                 ;
                 $rbret = Action::doRevert($change);
                 if ($rbret !== false) {
-                    $change[ 'edit_status' ] = 'reverted';
+                    $change['edit_status'] = 'reverted';
 
-                    Relay::revertEdit($change, $revertReason, (microtime(true) - $change[ 'startTime' ]));
+                    Relay::revertEdit($change, $revertReason, (microtime(true) - $change['startTime']));
                     Action::doWarn($change, $report);
                     Db::vandalismReverted($change['mysqlid']);
                 } else {
-                    $change[ 'edit_status' ] = 'beaten';
-                    $rv2 = API::$a->revisions($change[ 'title' ], 1);
-                    if ($change[ 'user' ] != $rv2[ 0 ][ 'user' ]) {
-                        Relay::beatenEdit($change, $rv2[ 0 ][ 'user' ], (microtime(true) - $change[ 'startTime' ]));
-                        Db::vandalismRevertBeaten($change['mysqlid'], $change['title'], $rv2[ 0 ][ 'user' ], $change[ 'url' ]);
+                    $change['edit_status'] = 'beaten';
+                    $rv2 = API::$a->revisions($change['title'], 1);
+                    if ($change['user'] != $rv2[0]['user']) {
+                        Relay::beatenEdit($change, $rv2[0]['user'], (microtime(true) - $change['startTime']));
+                        Db::vandalismRevertBeaten($change['mysqlid'], $change['title'], $rv2[0]['user'], $change['url']);
                     }
                 }
             } else {
@@ -80,7 +80,7 @@
                 and (preg_match('/\(\'\'\'\[\[([^|]*)\|more...\]\]\'\'\'\)/iU', API::$q->getpage('Wikipedia:Today\'s featured article/'.date('F j, Y')), $tfam))
             ) {
                 globals::$tfas = time();
-                globals::$tfa = $tfam[ 1 ];
+                globals::$tfa = $tfam[1];
             }
             if (config::$fork) {
                 $pid = pcntl_fork();
@@ -91,9 +91,9 @@
                 }
             }
             $change = parseFeedData($change);
-            $change[ 'justtitle' ] = $change[ 'title' ];
-            if (in_array('namespace', $change) && $change[ 'namespace' ] != 'Main:') {
-                $change[ 'title' ] = $change[ 'namespace' ].$change[ 'title' ];
+            $change['justtitle'] = $change['title'];
+            if (in_array('namespace', $change) && $change['namespace'] != 'Main:') {
+                $change['title'] = $change['namespace'].$change['title'];
             }
             self::processEditThread($change);
             if (config::$fork) {
