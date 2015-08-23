@@ -40,4 +40,22 @@ class Db
     {
         return LegacyDb::getCurrentRelayNode();
     }
+    public static function addOFVEntry($title)
+    {
+        return LegacyDb::addOFVEntry($title);
+    }
+    public static function getOFVCount($title)
+    {
+        return LegacyDb::getOFVCount($title);
+    }
+
+    public static function addTitleUserRevert($title, $user)
+    {
+        return LegacyDb::addTitleUserRevert($title, $user);
+    }
+
+    public static function getLastUserRevertForTitle($title, $user)
+    {
+        return LegacyDb::getLastUserRevertForTitle($title, $user);
+    }
 }

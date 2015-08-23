@@ -153,31 +153,6 @@
 
         return parseFeedData($feedData);
     }
-    function genOldFeedData($id)
-    {
-        /* namespace, namespaceid, title, flags, url, revid, old_revid, user, length, comment, timestamp */
-        ini_set('user_agent', 'ClueBot/2.0 (Training EditDB Scraper)');
-        $data = unserialize(file_get_contents('https://en.wikipedia.org/w/api.php?action=query&rawcontinue=1&prop=revisions&rvprop=timestamp|user|comment&format=php&revids='.urlencode($id)));
-        if (isset($data[ 'query' ][ 'badrevids' ])) {
-            return false;
-        }
-        $data = current($data[ 'query' ][ 'pages' ]);
-        $change = array(
-            'namespace' => namespace2name($data[ 'ns' ]),
-            'namespaceid' => $data[ 'ns' ],
-            'title' => str_replace(namespace2name($data[ 'ns' ]).':', '', $data[ 'title' ]),
-            'flags' => '',
-            'url' => '',
-            'revid' => $id,
-            'old_revid' => '',
-            'user' => $data[ 'revisions' ][ 0 ][ 'user' ],
-            'length' => '',
-            'comment' => isset($data[ 'revisions' ][ 0 ][ 'comment' ]) ? $data[ 'revisions' ][ 0 ][ 'comment' ] : '',
-            'timestamp' => strtotime($data[ 'revisions' ][ 0 ][ 'timestamp' ]),
-        );
-
-        return $change;
-    }
     function parseFeedData($feedData, $useOld = false)
     {
         $startTime = microtime(true);
@@ -251,7 +226,7 @@
     }
     function isVandalism($data, &$score)
     {
-        ($core_node, $core_port) = Db::getCurrentCoreNode();
+        list($core_node, $core_port) = Db::getCurrentCoreNode();
         $fp = fsockopen($core_node, $core_port, $errno, $errstr, 15);
         if (!$fp) {
             return false;
@@ -279,30 +254,4 @@
         }
 
         return $isVand;
-    }
-    function oldData($id)
-    {
-        $feedData = genOldFeedData($id);
-        if ($feedData === false) {
-            return false;
-        }
-        $feedData = parseFeedData($feedData, true, true);
-        if ($feedData === false) {
-            return false;
-        }
-        $feedData = $feedData[ 'all' ];
-
-        return $feedData;
-    }
-    function oldXML($ids)
-    {
-        if (!is_array($ids)) {
-            $ids = array($ids);
-        }
-        $feedData = array();
-        foreach ($ids as $id) {
-            $feedData[] = oldData($id);
-        }
-
-        return toXML($feedData);
     }

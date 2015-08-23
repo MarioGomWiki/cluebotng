@@ -190,13 +190,10 @@
 
                 return array(true, 'Angry-reverting on angry-optin');
             }
-            $titles = unserialize(file_get_contents('titles.txt'));
-            if (
-                !isset($titles[ $change[ 'title' ].$change[ 'user' ] ])
-                or ((time() - $titles[ $change[ 'title' ].$change[ 'user' ] ]) > (24 * 60 * 60))
-            ) {
-                $titles[ $change[ 'title' ].$change[ 'user' ] ] = time();
-                file_put_contents('titles.txt', serialize($titles));
+
+            $lurft = Db::getLastUserRevertForTitle($title, $user);
+            if ($lurft == 0 || (time() - $lurft) > 86400) {
+                Db::addTitleUserRevert($title, $user);
 
                 return array(true, $reason);
             }

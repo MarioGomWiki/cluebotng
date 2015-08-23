@@ -40,25 +40,13 @@
             echo 'No.'."\n";
             $reason = 'ANN scored at '.$s;
 
-            // Remove vandalism entries over 2 days old
-            $oftVand = unserialize(file_get_contents('oftenvandalized.txt'));
-            if (rand(1, 50) == 2) {
-                foreach ($oftVand as $art => $artVands) {
-                    foreach ($artVands as $key => $time) {
-                        if ((time() - $time) > 2 * 24 * 60 * 60) {
-                            unset($oftVand[ $art ][ $key ]);
-                        }
-                    }
-                }
-            }
-
             // Save this vandalism entry
-            $oftVand[ $change[ 'title' ] ][] = time();
-            file_put_contents('oftenvandalized.txt', serialize($oftVand));
+            Db::addOFVEntry($title);
 
             // Report repeat vandalism
-            if (count($oftVand[ $change[ 'title' ] ]) >= 30) {
-                Relay::repeatVandalism($change, count($oftVand[ $change[ 'title' ] ]));
+            $vandalism2DayCount = Db::getOFVCount($change['title']);
+            if ($vandalism2DayCount >= 30) {
+                Relay::repeatVandalism($change, vandalism2DayCount);
             }
 
             $change['mysqlid'] = Db::detectedVandalism($change['user'], $change['title'], $reason, $change['url'], $change['old_revid'], $change['revid']);

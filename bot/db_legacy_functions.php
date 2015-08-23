@@ -74,4 +74,69 @@ class LegacyDb
 
         return array($d['node'], $d['port']);
     }
+
+    public static function addOFVEntry($title)
+    {
+        checkLegacyMySQL();
+        mysql_query('INSERT INTO `often_vandalised` VALUES ('.
+                    '\''.mysql_real_escape_string($title).'\','.
+                    time().')', globals::$legacy_mysql);
+    }
+
+    private static function cleanupOVFEntries()
+    {
+        if (rand(0, 100) == 2) {
+            return;
+        }
+
+        checkLegacyMySQL();
+        mysql_query('DELETE FROM `often_vandalised` WHERE date < '.
+                    (time() - 172800));
+    }
+
+    public static function getOFVCount($title)
+    {
+        checkLegacyMySQL();
+        self::cleanupOVFEntries();
+        $res = mysql_query('SELECT COUNT(*) as count FROM `often_vandalised` WHERE date > '.
+                            (time() - 172800).
+                            ' AND title = '.
+                            '\''.mysql_real_escape_string($title).'\'');
+
+        if ($res !== false) {
+            $d = mysql_fetch_assoc($res);
+
+            return $d['count'];
+        }
+
+        return 0;
+    }
+
+    public static function addTitleUserRevert($title, $user)
+    {
+        checkLegacyMySQL();
+        mysql_query('REPLACE INTO `page_reverts` VALUES ('.
+                    '\''.mysql_real_escape_string($title).'\','.
+                    '\''.mysql_real_escape_string($user).'\','.
+                    time().')', globals::$legacy_mysql);
+    }
+
+    public static function getLastUserRevertForTitle($title, $user)
+    {
+        checkLegacyMySQL();
+        $res = mysql_query('SELECT date FROM `page_reverts` WHERE '.
+                                'title = '.'\''.
+                                    mysql_real_escape_string($title).'\' '.
+                                'AND user = '.'\''.
+                                    mysql_real_escape_string($user).'\'',
+                            globals::$legacy_mysql);
+
+        if ($res !== false) {
+            $d = mysql_fetch_assoc($res);
+
+            return $d['date'];
+        }
+
+        return 0;
+    }
 }

@@ -67,6 +67,27 @@ CREATE TABLE `cluster_node` (
   `type` varchar(256) NOT NULL,
   PRIMARY KEY  (`type`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
+--
+-- Table structure for table `often_vandalised`
+--
+DROP TABLE IF EXISTS `often_vandalised`;
+CREATE TABLE `often_vandalised` (
+  `title` varchar(256) NOT NULL,
+  `date` int(11) NOT NULL,
+  INDEX (`title`),
+  INDEX (`date`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
+--
+-- Table structure for table `page_reverts`
+--
+DROP TABLE IF EXISTS `page_reverts`;
+CREATE TABLE `page_reverts` (
+  `title` varchar(256) NOT NULL,
+  `user` varchar(256) NOT NULL,
+  `date` int(11) NOT NULL,
+  PRIMARY KEY (`title`,`user`),
+  INDEX (`date`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

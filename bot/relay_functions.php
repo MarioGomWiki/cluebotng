@@ -23,21 +23,23 @@ class Relay
     private static function send($prefix, $data)
     {
         $safe_prefix = preg_replace("/[^A-Za-z0-9_\-]/", '', $prefix);
-        $payload = $safe_prefix . '.' . json_encode($data);
+        $payload = $safe_prefix.'.'.json_encode($data);
 
         print "Sending to relay: $payload\n";
-        
-        ($relay_node, $relay_port) = Db::getCurrentRelayNode();
+
+        list($relay_node, $relay_port) = Db::getCurrentRelayNode();
         $fp = fsockopen($relay_node, $relay_port, $errno, $errstr, 2);
-        if($fp == null) {
+        if ($fp == null) {
             print "Could not connect to relay node: $errstr ($errno)\n";
+
             return;
         }
         fwrite($fp, $payload);
         fclose($fp);
     }
 
-    private static function skippedEdit($edit, $reason) {
+    private static function skippedEdit($edit, $reason)
+    {
         $data = array(
             'skipped_reason' => $reason,
             'edit' => $edit,
@@ -45,7 +47,8 @@ class Relay
         self::send('skipped_edit', $data);
     }
 
-    private static function stalkEdit($edit) {
+    private static function stalkEdit($edit)
+    {
         // Calculate which channels we need to send to
         $stalkchannel = array();
 
@@ -71,14 +74,16 @@ class Relay
         }
     }
 
-    private static function reportUserToAVI($user) {
+    private static function reportUserToAVI($user)
+    {
         $data = array(
             'user' => $user,
         );
         self::send('avi_report', $data);
     }
 
-    private static function warnUser($edit, $level) {
+    private static function warnUser($edit, $level)
+    {
         $data = array(
             'user' => $edit[ 'user' ],
             'level' => $level,
@@ -87,14 +92,16 @@ class Relay
         self::send('warn_user', $data);
     }
 
-    private static function angryRevert($edit) {
+    private static function angryRevert($edit)
+    {
         $data = array(
             'edit' => $edit,
         );
         self::send('angry_revert', $data);
     }
 
-    private static function repeatVandalism($edit, $count) {
+    private static function repeatVandalism($edit, $count)
+    {
         $data = array(
             '2day_count' => $count,
             'edit' => $edit,
@@ -102,7 +109,8 @@ class Relay
         self::send('repeat_vandalism', $data);
     }
 
-    private static function revertEdit($edit, $revertReason, $processingTime) {
+    private static function revertEdit($edit, $revertReason, $processingTime)
+    {
         $data = array(
             'reason' => $revertReason,
             'processing_time' => $processingTime,
@@ -111,7 +119,8 @@ class Relay
         self::send('vandalism_revert', $data);
     }
 
-    private static function beatenEdit($change, $beatenBy, $processingTime) {
+    private static function beatenEdit($change, $beatenBy, $processingTime)
+    {
         $data = array(
             'beaten_by' => $beatenBy,
             'processing_time' => $processingTime,
@@ -120,7 +129,8 @@ class Relay
         self::send('vandalism_revert_beaten', $data);
     }
 
-    private static function skippedVandalism($edit, $reason) {
+    private static function skippedVandalism($edit, $reason)
+    {
         $data = array(
             'skipped_reason' => $reason,
             'edit' => $edit,
