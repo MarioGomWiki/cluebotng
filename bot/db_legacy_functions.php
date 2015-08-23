@@ -136,7 +136,5 @@ class LegacyDb
 
             return $d['date'];
         }
-
-        return 0;
     }
 }

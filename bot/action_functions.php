@@ -195,7 +195,7 @@
             }
 
             $lurft = Db::getLastUserRevertForTitle($title, $user);
-            if ($lurft == 0 || (time() - $lurft) > 86400) {
+            if ($lurft == null || (time() - $lurft) > 86400) {
                 Db::addTitleUserRevert($title, $user);
 
                 return array(true, $reason);
