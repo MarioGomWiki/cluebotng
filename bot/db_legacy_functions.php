@@ -21,15 +21,14 @@
 class LegacyDb
 {
     // Returns the edit it for the vandalism
-    public static function detectedVandalism($user, $title, $heuristic, $reason, $url, $old_rev_id, $rev_id)
+    public static function detectedVandalism($user, $title, $reason, $url, $old_rev_id, $rev_id)
     {
         checkLegacyMySQL();
         $query = 'INSERT INTO `vandalism` '.
-            '(`id`,`user`,`article`,`heuristic`,`reason`,`diff`,`old_id`,`new_id`,`reverted`) '.
+            '(`id`,`user`,`article`,`reason`,`diff`,`old_id`,`new_id`,`reverted`) '.
             'VALUES '.
             '(NULL,\''.mysql_real_escape_string($user).'\','.
             '\''.mysql_real_escape_string($title).'\','.
-            '\''.mysql_real_escape_string($heuristic).'\','.
             '\''.mysql_real_escape_string($reason).'\','.
             '\''.mysql_real_escape_string($url).'\','.
             '\''.mysql_real_escape_string($old_rev_id).'\','.
@@ -61,18 +60,18 @@ class LegacyDb
     public static function getCurrentCoreNode()
     {
         checkLegacyMySQL();
-        $res = mysql_query('SELECT `node` from `cluster_node` where type="core"', globals::$legacy_mysql);
+        $res = mysql_query('SELECT `node`, `port` from `cluster_node` where type="core"', globals::$legacy_mysql);
         $d = mysql_fetch_assoc($res);
 
-        return $d['node'];
+        return array($d['node'], $d['port']);
     }
     // Returns the hostname of the current relay node
     public static function getCurrentRelayNode()
     {
         checkLegacyMySQL();
-        $res = mysql_query('SELECT `node` from `cluster_node` where type="relay"', globals::$legacy_mysql);
+        $res = mysql_query('SELECT `node`, `port` from `cluster_node` where type="ng_relay"', globals::$legacy_mysql);
         $d = mysql_fetch_assoc($res);
 
-        return $d['node'];
+        return array($d['node'], $d['port']);
     }
 }

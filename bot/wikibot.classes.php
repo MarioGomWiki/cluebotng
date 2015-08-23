@@ -239,13 +239,11 @@
             $this->user = $user;
             $this->pass = $pass;
             $x = unserialize($this->http->post($this->apiurl.'?action=login&format=php', array('lgname' => $user, 'lgpassword' => $pass)));
-            print_r($x);
             if ($x['login']['result'] == 'Success') {
                 return true;
             }
             if ($x['login']['result'] == 'NeedToken') {
                 $x = unserialize($this->http->post($this->apiurl.'?action=login&format=php', array('lgname' => $user, 'lgpassword' => $pass, 'lgtoken' => $x['login']['token'])));
-                print_r($x);
                 if ($x['login']['result'] == 'Success') {
                     return true;
                 }
@@ -718,7 +716,6 @@
             $params = array(
                 'action' => 'edit',
                 'format' => 'php',
-//				'assert' => 'bot',
                 'title' => $page,
                 'text' => $data,
                 'token' => $this->getedittoken(),
@@ -789,7 +786,6 @@
         {
             if (($token == null) or ($token == '')) {
                 $token = $this->revisions($title, 1, 'older', false, null, true, true);
-                print_r($token);
                 if ($token[0]['user'] == $user) {
                     $token = $token[0]['rollbacktoken'];
                 } else {
@@ -803,7 +799,6 @@
                 'user' => $user,
                 'summary' => $reason,
                 'token' => $token,
-//				'markbot' => 0
             );
 
             echo 'Posting to API: ';
@@ -874,8 +869,6 @@
             if (!$rv[0]['*']) {
                 $rv[0]['*'] = $wpq->getpage($page);
             }
-
-            //Fake the edit form.
             $now = gmdate('YmdHis', time());
             $token = htmlspecialchars($this->edittoken);
             $tmp = date_parse($rv[0]['timestamp']);
@@ -902,7 +895,6 @@
             if (!preg_match('/'.preg_quote($user, '/').'/iS', $rv['currentuser'])) {
                 return false;
             } /* We need to be logged in */
-//			if (preg_match('/'.preg_quote('You have new messages','/').'/iS',$rv[0]['*'])) { return false; } /* Check talk page */
 
             $x = $this->forcepost($page, $data, $summery, $minor, $html, Config::$maxlag, Config::$maxlagkeepgoing, $bot); /* Go ahead and post. */
             $this->lastpost = time();
@@ -984,7 +976,6 @@
             $html = $this->http->get($this->indexurl.'?title='.urlencode($title).'&action=render&diff='.urlencode($id).'&oldid='.urlencode($oldid).'&diffonly=1');
 
             if (preg_match_all('/\&amp\;(oldid\=)(\d*)\\\'\>(Revision as of|Current revision as of)/USs', $html, $m, PREG_SET_ORDER)) {
-                //print_r($m);
                 if ((($oldid != $m[0][2]) and (is_numeric($oldid))) or (($id != $m[1][2]) and (is_numeric($id)))) {
                     if ($wait == true) {
                         sleep(1);
@@ -1000,25 +991,21 @@
             }
 
             if (preg_match_all('/\<td class\=(\"|\\\')diff-addedline\1\>\<div\>(.*)\<\/div\>\<\/td\>/USs', $html, $m, PREG_SET_ORDER)) {
-                //print_r($m);
                 foreach ($m as $x) {
                     $added .= htmlspecialchars_decode(strip_tags($x[2]))."\n";
                 }
             }
 
             if (preg_match_all('/\<td class\=(\"|\\\')diff-deletedline\1\>\<div\>(.*)\<\/div\>\<\/td\>/USs', $html, $m, PREG_SET_ORDER)) {
-                //print_r($m);
                 foreach ($m as $x) {
                     $deleted .= htmlspecialchars_decode(strip_tags($x[2]))."\n";
                 }
             }
 
-            //echo $added."\n".$deleted."\n";
-
             if (preg_match('/action\=rollback\&amp\;from\=.*\&amp\;token\=(.*)\"/US', $html, $m)) {
                 $rbtoken = $m[1];
                 $rbtoken = urldecode($rbtoken);
-//				echo 'rbtoken: '.$rbtoken.' -- '; print_r($m); echo "\n\n";
+
                 return array($added,$deleted,$rbtoken);
             }
 
@@ -1046,7 +1033,6 @@
                 $wpapi->apiurl = str_replace('index.php', 'api.php', $this->indexurl);
                 $token = $wpapi->revisions($title, 1, 'older', false, null, true, true);
                 if ($token[0]['user'] == $user) {
-                    //					echo 'Token: '; print_r($token); echo "\n\n";
                     $token = $token[0]['rollbacktoken'];
                 } else {
                     return false;

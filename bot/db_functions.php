@@ -20,9 +20,9 @@
  */
 class Db
 {
-    public static function detectedVandalism($user, $title, $heuristic, $reason, $url, $old_rev_id, $rev_id)
+    public static function detectedVandalism($user, $title, $reason, $url, $old_rev_id, $rev_id)
     {
-        return LegacyDb::detectedVandalism($user, $title, $heuristic, $reason, $url, $old_rev_id, $rev_id);
+        return LegacyDb::detectedVandalism($user, $title, $reason, $url, $old_rev_id, $rev_id);
     }
     public static function vandalismReverted($edit_id)
     {

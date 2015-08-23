@@ -43,16 +43,6 @@
                 self::loop($line);
             }
         }
-        public static function bail($change, $why = '', $score = 'N/A', $reverted = false)
-        {
-            if (!in_array('raw_line', $change)) {
-                return;
-            }
-
-            $udp = fsockopen('udp://'.Db::getCurrentRelayNode(), config::$udpport);
-            fwrite($udp, $change[ 'rawline' ]."\003 # ".$score.' # '.$why.' # '.($reverted ? 'Reverted' : 'Not reverted'));
-            fclose($udp);
-        }
         private static function loop($line)
         {
             $d = IRC::split($line);
@@ -77,35 +67,18 @@
                             $message = str_replace("\002", '', $rawmessage);
                             $message = preg_replace('/\003(\d\d?(,\d\d?)?)?/', '', $message);
                             $data = parseFeed($message);
+
                             if ($data === false) {
                                 return;
                             }
-                            $data[ 'line' ] = $message;
-                            $data[ 'rawline' ] = $rawmessage;
+
                             if (stripos('N', $data[ 'flags' ]) !== false) {
-                                self::bail($data, 'New article');
+                                Relay::skippedEdit($data, 'new_arcticle');
 
                                 return;
                             }
-                            $stalkchannel = array();
-                            foreach (globals::$stalk as $key => $value) {
-                                if (myfnmatch(str_replace('_', ' ', $key), str_replace('_', ' ', $data[ 'user' ]))) {
-                                    $stalkchannel = array_merge($stalkchannel, explode(',', $value));
-                                }
-                            }
-                            foreach (globals::$edit as $key => $value) {
-                                if (myfnmatch(str_replace('_', ' ', $key), str_replace('_', ' ', ($data[ 'namespace' ] == 'Main:' ? '' : $data[ 'namespace' ]).$data[ 'title' ]))) {
-                                    $stalkchannel = array_merge($stalkchannel, explode(',', $value));
-                                }
-                            }
-                            $stalkchannel = array_unique($stalkchannel);
-                            foreach ($stalkchannel as $chan) {
-                                IRC::say(
-                                    $chan, 'New edit: [['.($data[ 'namespace' ] == 'Main:' ? '' : $data[ 'namespace' ]).$data[ 'title' ].']] https://en.wikipedia.org/w/index.php?title='.
-                                    urlencode($data[ 'namespace' ].$data[ 'title' ]).'&diff=prev&oldid='.urlencode($data[ 'revid' ]).' * '.$data[ 'user' ].
-                                    ' * '.$data[ 'comment' ]
-                                );
-                            }
+
+                            Relay::stalkEdit($data);
                             switch ($data[ 'namespace' ].$data[ 'title' ]) {
                                 case 'User:'.config::$user.'/Run':
                                     globals::$run = API::$q->getpage('User:'.config::$user.'/Run');

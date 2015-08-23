@@ -251,7 +251,8 @@
     }
     function isVandalism($data, &$score)
     {
-        $fp = fsockopen(Db::getCurrentCoreNode(), config::$coreport, $errno, $errstr, 15);
+        ($core_node, $core_port) = Db::getCurrentCoreNode();
+        $fp = fsockopen($core_node, $core_port, $errno, $errstr, 15);
         if (!$fp) {
             return false;
         }

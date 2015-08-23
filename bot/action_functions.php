@@ -53,7 +53,7 @@
         {
             $aivdata = API::$q->getpage('Wikipedia:Administrator_intervention_against_vandalism/TB2');
             if (!preg_match('/'.preg_quote($change[ 'user' ], '/').'/i', $aivdata)) {
-                IRC::say('aivchannel', '!admin Reporting [[User:'.$change[ 'user' ].']] to [[WP:AIV]]. Contributions: [[Special:Contributions/'.$change[ 'user' ].']] Block: [[Special:Blockip/'.$change[ 'user' ].']]');
+                Relay::reportUserToAVI($change[ 'user' ]);
                 API::$a->edit(
                     'Wikipedia:Administrator_intervention_against_vandalism/TB2',
                     $aivdata."\n\n"
@@ -84,7 +84,6 @@
                 false,
                 false
             ); /* Warn the user */
-            print_r($ret);
         }
         public static function doWarn($change, $report)
         {
@@ -96,7 +95,7 @@
                     self::warn($change, $report, $tpcontent, $warning);
                 }
             }
-            IRC::say('vandalismchannel', 'rcbot bl add '.$change[ 'user' ].' x='.(24 * $warning).' r=Vandalism to [['.$change[ 'title' ].']] (#'.$warning.').');
+            Relay::warnUser($change, $warning);
         }
         public static function doRevert($change)
         {
@@ -187,7 +186,7 @@
                 return array(true, 'Angry-reverting on TFA');
             }
             if (preg_match('/\* \[\[('.preg_quote($change[ 'title' ], '/').')\]\] \- .*/i', globals::$aoptin)) {
-                IRC::say('debugchannel', 'Angry-reverting [['.$change[ 'title' ].']].');
+                Relay::angryRevert($change);
 
                 return array(true, 'Angry-reverting on angry-optin');
             }

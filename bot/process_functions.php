@@ -23,37 +23,24 @@
         public static function processEditThread($change)
         {
             $change[ 'edit_status' ] = 'not_reverted';
-            if (!isset($s)) {
-                $change[ 'edit_score' ] = 'N/A';
-                $s = null;
-            } else {
-                $change[ 'edit_score' ] = $s;
-            }
+            $s = null;
+            $change[ 'edit_score' ] = &$s;
             if (!in_array('all', $change) || !isVandalism($change[ 'all' ], $s)) {
-                Feed::bail($change, 'Below threshold', $s);
+                Relay::skippedVandalism($change, 'below_threashold');
 
                 return;
             }
+
             echo 'Is '.$change[ 'user' ].' whitelisted ?'."\n";
             if (Action::isWhitelisted($change[ 'user' ])) {
-                Feed::bail($change, 'Whitelisted', $s);
+                Relay::skippedVandalism($change, 'whitelisted');
 
                 return;
             }
             echo 'No.'."\n";
             $reason = 'ANN scored at '.$s;
-            $heuristic = '';
-            $log = null;
-            $diff = 'https://en.wikipedia.org/w/index.php'.
-                '?title='.urlencode($change[ 'title' ]).
-                '&diff='.urlencode($change[ 'revid' ]).
-                '&oldid='.urlencode($change[ 'old_revid' ]);
-            $report = '[['.str_replace('File:', ':File:', $change[ 'title' ]).']] was '
-                .'['.$diff.' changed] by '
-                .'[[Special:Contributions/'.$change[ 'user' ].'|'.$change[ 'user' ].']] '
-                .'[[User:'.$change[ 'user' ].'|(u)]] '
-                .'[[User talk:'.$change[ 'user' ].'|(t)]] '
-                .$reason.' on '.gmdate('c');
+
+            // Remove vandalism entries over 2 days old
             $oftVand = unserialize(file_get_contents('oftenvandalized.txt'));
             if (rand(1, 50) == 2) {
                 foreach ($oftVand as $art => $artVands) {
@@ -64,37 +51,38 @@
                     }
                 }
             }
+
+            // Save this vandalism entry
             $oftVand[ $change[ 'title' ] ][] = time();
-            if (count($oftVand[ $change[ 'title' ] ]) >= 30) {
-                IRC::say('reportchannel', '!admin [['.$change['title'].']] has been vandalized '.(count($oftVand[ $change[ 'title' ] ])).' times in the last 2 days.');
-            }
             file_put_contents('oftenvandalized.txt', serialize($oftVand));
-            $ircreport = "\x0315[[\x0307".$change[ 'title' ]."\x0315]] by \"\x0303".$change[ 'user' ]."\x0315\" (\x0312 ".$change[ 'url' ]." \x0315) \x0306".$s."\x0315 (";
-            $change['mysqlid'] = Db::detectedVandalism($change['user'], $change['title'], $heuristic, $reason, $change['url'], $change['old_revid'], $change['revid']);
-            echo 'Should revert?'."\n";
+
+            // Report repeat vandalism
+            if (count($oftVand[ $change[ 'title' ] ]) >= 30) {
+                Relay::repeatVandalism($change, count($oftVand[ $change[ 'title' ] ]));
+            }
+
+            $change['mysqlid'] = Db::detectedVandalism($change['user'], $change['title'], $reason, $change['url'], $change['old_revid'], $change['revid']);
+
             list($shouldRevert, $revertReason) = Action::shouldRevert($change);
-            $change[ 'revert_reason' ] = $revertReason;
             if ($shouldRevert) {
-                echo 'Yes.'."\n";
+                ;
                 $rbret = Action::doRevert($change);
                 if ($rbret !== false) {
                     $change[ 'edit_status' ] = 'reverted';
-                    IRC::say('debugchannel', $ircreport."\x0304Reverted\x0315) (\x0313".$revertReason."\x0315) (\x0302".(microtime(true) - $change[ 'startTime' ])." \x0315s)");
+
+                    Relay::revertEdit($change, $revertReason, (microtime(true) - $change[ 'startTime' ]));
                     Action::doWarn($change, $report);
                     Db::vandalismReverted($change['mysqlid']);
-                    Feed::bail($change, $revertReason, $s, true);
                 } else {
                     $change[ 'edit_status' ] = 'beaten';
                     $rv2 = API::$a->revisions($change[ 'title' ], 1);
                     if ($change[ 'user' ] != $rv2[ 0 ][ 'user' ]) {
-                        IRC::say('debugchannel', $ircreport."\x0303Not Reverted\x0315) (\x0313Beaten by ".$rv2[ 0 ][ 'user' ]."\x0315) (\x0302".(microtime(true) - $change[ 'startTime' ])." \x0315s)");
+                        Relay::beatenEdit($change, $rv2[ 0 ][ 'user' ], (microtime(true) - $change[ 'startTime' ]));
                         Db::vandalismRevertBeaten($change['mysqlid'], $change['title'], $rv2[ 0 ][ 'user' ], $change[ 'url' ]);
-                        Feed::bail($change, 'Beaten by '.$rv2[ 0 ][ 'user' ], $s);
                     }
                 }
             } else {
-                IRC::say('debugchannel', $ircreport."\x0303Not Reverted\x0315) (\x0313".$revertReason."\x0315) (\x0302".(microtime(true) - $change[ 'startTime' ])." \x0315s)");
-                Feed::bail($change, $revertReason, $s);
+                Relay::skippedVandalism($change, $revertReason);
             }
         }
         public static function processEdit($change)
