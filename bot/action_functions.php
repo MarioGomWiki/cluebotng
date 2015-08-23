@@ -148,20 +148,14 @@
         public static function shouldRevert($change)
         {
             $reason = 'Default revert';
-            if (preg_match('/(assisted|manual)/iS', config::$status)) {
-                echo 'Revert [y/N]? ';
-                if (strtolower(substr(fgets(globals::$stdin, 3), 0, 1)) != 'y') {
-                    return array(false, 'Manual mode says no');
-                }
-            }
-            if (!preg_match('/(yes|enable|true)/iS', globals::$run)) {
-                return array(false, 'Run disabled');
+            if (!preg_match('/(true)/iS', globals::$run)) {
+                return array(false, 'run_disabled');
             }
             if (empty($change['mysqlid'])) {
-                return array(false, 'Could not get revert id');
+                return array(false, 'error_no_mysqlid');
             }
             if ($change['user'] == config::$user) {
-                return array(false, 'User is myself');
+                return array(false, 'user_is_self');
             }
             if ((time() - globals::$tfas) >= 1800) {
                 if (preg_match('/\(\'\'\'\[\[([^|]*)\|more...\]\]\'\'\'\)/iU', API::$q->getpage('Wikipedia:Today\'s featured article/'.date('F j, Y')), $tfam)) {
@@ -170,16 +164,16 @@
                 }
             }
             if (!self::findAndParseBots($change)) {
-                return array(false, 'Exclusion compliance');
+                return array(false, 'exclusion_compliance');
             }
             if ($change['all']['user'] == $change['all']['common']['creator']) {
-                return array(false, 'User is creator');
+                return array(false, 'user_is_creator');
             }
             if ($change['all']['user_edit_count'] > 50) {
                 if ($change['all']['user_warns'] / $change['all']['user_edit_count'] < 0.1) {
-                    return array(false, 'User has edit count');
+                    return array(false, 'user_has_edit_count');
                 } else {
-                    $reason = 'User has edit count, but warns > 10%';
+                    $reason = 'user_has_edit_count_with_warns';
                 }
             }
             if (globals::$tfa == $change['title']) {
