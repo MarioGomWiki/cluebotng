@@ -163,9 +163,6 @@
             if ($change['user'] == config::$user) {
                 return array(false, 'User is myself');
             }
-            if (config::$angry) {
-                return array(true, 'Angry-reverting in angry mode');
-            }
             if ((time() - globals::$tfas) >= 1800) {
                 if (preg_match('/\(\'\'\'\[\[([^|]*)\|more...\]\]\'\'\'\)/iU', API::$q->getpage('Wikipedia:Today\'s featured article/'.date('F j, Y')), $tfam)) {
                     globals::$tfas = time();
