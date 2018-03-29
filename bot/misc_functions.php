@@ -40,7 +40,9 @@ function doInit()
         Config::$pass = trim(file_get_contents(getenv('HOME') . '/.cluebotng.password.only'));
     }
     Api::init();
-    Api::$a->login(Config::$user, Config::$pass);
+    if (!Api::$a->login(Config::$user, Config::$pass)) {
+        throw new \Exception('login failed');
+    }
     Globals::$tfas = 0;
     Globals::$stdin = fopen('php://stdin', 'r');
     Globals::$run = Api::$q->getpage('User:' . Config::$user . '/Run');
