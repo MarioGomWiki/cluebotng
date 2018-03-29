@@ -46,4 +46,6 @@ namespace CluebotNG;
         public static $fork = true;
         public static $dry = false;
         public static $sentry_url = null;
+        public static $log_level = 'INFO';
+        public static $log_path = getenv('HOME').'/logs/cluebotng.log;
     }
