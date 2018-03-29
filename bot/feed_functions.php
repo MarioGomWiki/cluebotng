@@ -22,14 +22,13 @@ namespace CluebotNG;
 
 class Feed
 {
-    public static $host = 'irc.wikimedia.org';
-    public static $port = 6667;
-    public static $channel = '#en.wikipedia';
     private static $fd;
 
     public static function connectLoop()
     {
-        self::$fd = fsockopen(self::$host, self::$port, $feederrno, $feederrstr, 30);
+        $host = Config::$feed_irc_host;
+        $port = Config::$feed_irc_port;
+        self::$fd = fsockopen($host, $port, $feederrno, $feederrstr, 30);
         if (!self::$fd) {
             return;
         }
@@ -54,6 +53,7 @@ class Feed
 
     private static function loop($line)
     {
+        $channel = Config::$feed_irc_channel;
         global $logger;
         $d = IRC::split($line);
         if ($d === null) {
@@ -69,10 +69,10 @@ class Feed
             switch ($d['command']) {
                 case '376':
                 case '422':
-                    self::send('JOIN ' . self::$channel);
+                    self::send('JOIN ' . $channel);
                     break;
                 case 'privmsg':
-                    if (strtolower($d['target']) == self::$channel) {
+                    if (strtolower($d['target']) == $channel) {
                         $rawmessage = $d['pieces'][0];
                         $message = str_replace("\002", '', $rawmessage);
                         $message = preg_replace('/\003(\d\d?(,\d\d?)?)?/', '', $message);

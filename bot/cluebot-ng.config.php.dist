@@ -48,4 +48,7 @@ namespace CluebotNG;
         public static $sentry_url = null;
         public static $log_level = 'INFO';
         public static $log_path = getenv('HOME').'/logs/cluebotng.log;
+        public static $feed_irc_host = 'irc.wikimedia.org';
+        public static $feed_irc_port = 6667;
+        public static $feed_irc_channel = '#en.wikipedia';
     }
