@@ -1,0 +1,54 @@
+<?php
+namespace CluebotNG;
+/*
+ * Copyright (C) 2015 Jacobi Carter and Chris Breneman
+ *
+ * This file is part of ClueBot NG.
+ *
+ * ClueBot NG is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * ClueBot NG is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with ClueBot NG.  If not, see <http://www.gnu.org/licenses/>.
+ */
+    class Config
+    {
+        public static $user = '{{ .Env.CBNG_USER }}';
+        public static $pass = '{{ .Env.CBNG_PASS }}';
+        public static $status = 'auto';
+        public static $angry = false;
+        public static $owner = '{{ .Env.CBNG_OWNER }}';
+        public static $friends = '{{ .Env.CBNG_FRIENDS }}';
+        public static $mw_mysql_host = '{{ .Env.MW_MYSQL_HOST }}';
+        public static $mw_mysql_port = {{ .Env.MW_MYSQL_PORT }};
+        public static $mw_mysql_user = '{{ .Env.MW_MYSQL_USER }}';
+        public static $mw_mysql_pass = '{{ .Env.MW_MYSQL_PASS }}';
+        public static $mw_mysql_db = '{{ .Env.MW_MYSQL_DB }}';
+        public static $legacy_mysql_host = '{{ .Env.CBNG_MYSQL_HOST }}';
+        public static $legacy_mysql_port = {{ .Env.CBNG_MYSQL_PORT }};
+        public static $legacy_mysql_user = '{{ .Env.CBNG_MYSQL_USER }}';
+        public static $legacy_mysql_pass = '{{ .Env.CBNG_MYSQL_PASS }}';
+        public static $legacy_mysql_db = '{{ .Env.CBNG_MYSQL_DB }}';
+        public static $cb_mysql_host = '{{ .Env.CBNG_MYSQL_HOST }}';
+        public static $cb_mysql_port = {{ .Env.CBNG_MYSQL_PORT }};
+        public static $cb_mysql_user = '{{ .Env.CBNG_MYSQL_USER }}';
+        public static $cb_mysql_pass = '{{ .Env.CBNG_MYSQL_PASS }}';
+        public static $cb_mysql_db = '{{ .Env.CBNG_MYSQL_DB }}';
+        public static $udpport = 3334;
+        public static $coreport = 3565;
+        public static $fork = true;
+        public static $dry = false;
+        public static $sentry_url = null;
+        public static $log_level = '{{ .Env.LOG_LEVEL }}';
+        public static $log_path = 'php://stderr';
+        public static $feed_irc_host = '{{ default .Env.FEED_IRC_HOST "irc.wikimedia.org" }}';
+        public static $feed_irc_port = {{ default .Env.FEED_IRC_PORT "6667" }};
+        public static $feed_irc_channel = '{{ default .Env.FEED_IRC_CHANNEL "#en.wikipedia" }}';
+    }

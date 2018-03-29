@@ -1,0 +1,34 @@
+FROM php:7-cli
+
+ENV DOCKERIZE_VERSION v0.6.1
+
+ENV CBNG_USER "ClueBot NG"
+ENV CBNG_PASS ""
+ENV CBNG_OWNER Cobi
+ENV CBNG_FRIENDS ClueBot,DASHBotAV
+ENV MW_MYSQL_HOST enwiki.labsdb
+ENV MW_MYSQL_PORT 3306
+ENV MW_MYSQL_DB enwiki_p
+ENV CBNG_MYSQL_HOST tools-db
+ENV CBNG_MYSQL_PORT 3306
+ENV CBNG_MYSQL_DB cb
+ENV LOG_LEVEL DEBUG
+
+RUN \
+	apt-get update && \
+	apt-get install -y wget git libcurl4-openssl-dev && \
+	rm -rf /var/lib/apt/lists && \
+	apt-get clean && \
+	docker-php-ext-install pcntl && \
+	docker-php-ext-install mysqli && \
+	wget --quiet https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && \
+	tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && \
+    rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && \
+	echo -e 'log_errors = On\nerror_log = /dev/stderr' > /usr/local/etc/php/conf.d/logging.ini
+
+ADD bot /opt/cbng/bot
+WORKDIR /opt/cbng/bot
+RUN ./composer.phar install
+
+ENTRYPOINT ["dockerize", "-template", "/opt/cbng/bot/cluebot-ng.config.php.docker:/opt/cbng/bot/cluebot-ng.config.php"]
+CMD ["php", "/opt/cbng/bot/cluebot-ng.php"]

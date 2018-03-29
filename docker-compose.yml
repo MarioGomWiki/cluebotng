@@ -1,0 +1,37 @@
+version: '3'
+services:
+  core:
+    build:
+      context: .
+      dockerfile: Dockerfile.core
+    volumes:
+    - "./conf/docker:/opt/cbng/core/etc"
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile.bot
+    environment:
+      CBNG_MYSQL_HOST: mysql
+      CBNG_MYSQL_USER: root
+      CBNG_MYSQL_PASS: s3krit
+      MW_MYSQL_HOST: mysql
+      MW_MYSQL_USER: root
+      MW_MYSQL_PASS: s3krit
+      MW_MYSQL_DB: eswiki_p
+      CBNG_USER: ${CBNG_USER}
+      CBNG_PASS: ${CBNG_PASS}
+      LOG_LEVEL: DEBUG
+      FEED_IRC_CHANNEL: "#es.wikipedia"
+    volumes:
+    - "./bot:/opt/cbng/bot"
+    links:
+    - core
+    - mysql
+  mysql:
+    image: mariadb:10
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: s3krit
+      MYSQL_DATABASE: cb
+    volumes:
+    - "./bot/cluebot.sql:/docker-entrypoint-initdb.d/0001-cluebotng-bot.sql"
