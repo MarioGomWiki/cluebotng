@@ -27,45 +27,48 @@ function is_mysql_alive($con)
 
 function checkLegacyMySQL()
 {
-    if (!Globals::$legacy_mysql || !is_mysql_alive(Globals::$legacy_mysql)) {
-        Globals::$legacy_mysql = @mysqli_connect(
-            'p:' . Config::$legacy_mysql_host,
-            Config::$legacy_mysql_user,
-            Config::$legacy_mysql_pass,
-            Config::$legacy_mysql_db,
-            Config::$legacy_mysql_port
-        );
-        mysqli_select_db(Globals::$legacy_mysql, Config::$legacy_mysql_db);
-    }
+    return _checkMySql(
+        Globals::$legacy_mysql,
+        Config::$legacy_mysql_host,
+        Config::$legacy_mysql_user,
+        Config::$legacy_mysql_pass,
+        Config::$legacy_mysql_db,
+        Config::$legacy_mysql_port);
 }
 
 function checkMySQL()
 {
-    if (!Globals::$cb_mysql || !is_mysql_alive(Globals::$cb_mysql)) {
-        Globals::$cb_mysql = @mysqli_connect(
-            'p:' . Config::$cb_mysql_host,
-            Config::$cb_mysql_user,
-            Config::$cb_mysql_pass,
-            Config::$cb_mysql_db,
-            Config::$cbmysql_port
-        );
-        mysqli_select_db(Globals::$cb_mysql, Config::$cb_mysql_db);
-    }
+    return _checkMySql(
+        Globals::$cb_mysql,
+        Config::$cb_mysql_host,
+        Config::$cb_mysql_user,
+        Config::$cb_mysql_pass,
+        Config::$cb_mysql_db,
+        Config::$cb_mysql_port);
 }
 
 function checkRepMySQL()
 {
-    if (!Globals::$mw_mysql || !is_mysql_alive(Globals::$mw_mysql)) {
-        Globals::$mw_mysql = mysqli_connect(
-            'p:' . Config::$mw_mysql_host,
-            Config::$mw_mysql_user,
-            Config::$mw_mysql_pass,
-            Config::$mw_mysql_db,
-            Config::$mw_mysql_port
+    return _checkMySql(
+        Globals::$mw_mysql,
+        Config::$mw_mysql_host,
+        Config::$mw_mysql_user,
+        Config::$mw_mysql_pass,
+        Config::$mw_mysql_db,
+        Config::$mw_mysql_port);
+}
 
-        );
-        mysqli_select_db(Globals::$mw_mysql, Config::$mw_mysql_db);
+function _checkMySql(&$conn, $host, $user, $pass, $db, $port) {
+    if ($conn && is_mysql_alive($conn)) {
+        return true;
     }
+
+    $conn = mysqli_connect('p:' . $host, $user, $pass, $db, $port);
+    if (!$conn) {
+        return false;
+    }
+
+    return mysqli_select_db($conn, $db);
 }
 
 function getCbData($user = '', $nsid = '', $title = '', $timestamp = '')

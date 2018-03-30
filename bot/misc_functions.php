@@ -45,6 +45,19 @@ function doInit()
     if (!Api::$a->login(Config::$user, Config::$pass)) {
         throw new \Exception('login failed');
     }
+
+    if (!checkMySQL()) {
+        throw new \Exception('cannot connect to MySQL database');
+    }
+
+    if (!checkLegacyMySQL()) {
+        throw new \Exception('cannot connect to legacy MySQL database');
+    }
+
+    if (!checkRepMySQL()) {
+        throw new \Exception('cannot connect to MediaWiki replica MySQL database');
+    }
+
     Globals::$tfas = 0;
     Globals::$stdin = fopen('php://stdin', 'r');
     Globals::$run = Api::$q->getpage('User:' . Config::$user . '/Run');
