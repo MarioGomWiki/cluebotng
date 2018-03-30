@@ -36,6 +36,8 @@ function myfnmatch($pattern, $string)
 function doInit()
 {
     global $logger;
+    $logger->info("Starting initialization");
+
     if (Config::$pass == null) {
         Config::$pass = trim(file_get_contents(getenv('HOME') . '/.cluebotng.password.only'));
     }
@@ -73,4 +75,6 @@ function doInit()
             }
         }
     }
+
+    $logger->info("Finished initialization");
 }

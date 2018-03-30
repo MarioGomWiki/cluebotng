@@ -117,6 +117,8 @@ class IRC
 
     public static function init()
     {
+        global $logger;
+        $logger->info("Starting IRC initialization");
         $ircconfig = explode("\n", Api::$q->getpage('User:' . Config::$owner . '/CBChannels.js'));
         $tmp = array();
         foreach ($ircconfig as $tmpline) {
@@ -130,5 +132,6 @@ class IRC
             }
         }
         self::$chans = $tmp;
+        $logger->info("Finished IRC initialization");
     }
 }

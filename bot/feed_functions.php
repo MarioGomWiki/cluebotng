@@ -26,10 +26,13 @@ class Feed
 
     public static function connectLoop()
     {
+        global $logger;
         $host = Config::$feed_irc_host;
         $port = Config::$feed_irc_port;
+        $logger->info('Connecting to IRC', array('host' => $host, 'port' => $port));
         self::$fd = fsockopen($host, $port, $feederrno, $feederrstr, 30);
         if (!self::$fd) {
+            $logger->error('Connection to IRC server failed');
             return;
         }
         $nick = str_replace(' ', '_', Config::$user);
@@ -39,9 +42,11 @@ class Feed
             $rawline = fgets(self::$fd, 1024);
             $line = str_replace(array("\n", "\r"), '', $rawline);
             if (!$line) {
+                $logger->info('Closing IRC connection');
                 fclose(self::$fd);
                 break;
             }
+            $logger->debug('Read line from IRC', array('line' => $line));
             self::loop($line);
         }
     }
@@ -53,15 +58,18 @@ class Feed
 
     private static function loop($line)
     {
-        $channel = Config::$feed_irc_channel;
         global $logger;
+        $channel = Config::$feed_irc_channel;
+        $logger->debug('Starting IRC loop');
         $d = IRC::split($line);
         if ($d === null) {
+            $logger->warn('Could not parse line from IRC', array('line' => $line));
             return;
         }
         if ($d['type'] == 'direct') {
             switch ($d['command']) {
                 case 'ping':
+                    $logger->info('Received ping on IRC', array('d' => $d));
                     self::send('PONG :' . $d['pieces'][0]);
                     break;
             }
@@ -69,6 +77,7 @@ class Feed
             switch ($d['command']) {
                 case '376':
                 case '422':
+                    $logger->info('Joining IRC channel', array('channel' => $channel));
                     self::send('JOIN ' . $channel);
                     break;
                 case 'privmsg':
@@ -78,13 +87,13 @@ class Feed
                         $message = preg_replace('/\003(\d\d?(,\d\d?)?)?/', '', $message);
                         $data = parseFeed($message);
                         if ($data === false) {
+                            $logger->debug('Failed to parse feed message', array('message' => $message));
                             return;
                         }
                         $data['line'] = $message;
                         $data['rawline'] = $rawmessage;
                         if (stripos('N', $data['flags']) !== false) {
                             self::bail($data, 'New article');
-
                             return;
                         }
                         $stalkchannel = array();
@@ -108,6 +117,7 @@ class Feed
                             }
                         }
                         $stalkchannel = array_unique($stalkchannel);
+                        $logger->debug('Notifying stalk channels', array('stalkchannel' => $stalkchannel));
                         foreach ($stalkchannel as $chan) {
                             IRC::say(
                                 $chan,
@@ -144,8 +154,10 @@ class Feed
 
                             return;
                         }
-                        $logger->addInfo('Processing: ' . $message);
+                        $logger->info('Processing edit', array('message' => $message));
                         Process::processEdit($data);
+                    } else {
+                        $logger->debug('Got private message, ignoring.', array('d' => $d));
                     }
                     break;
             }
@@ -154,6 +166,8 @@ class Feed
 
     public static function bail($change, $why = '', $score = 'N/A', $reverted = false)
     {
+        global $logger;
+        $logger->debug('Found new change', array('change' => $change, 'why' => $why, 'score' => $score, 'reverted' => $reverted));
         $rchange = $change;
         $rchange['edit_reason'] = $why;
         $rchange['edit_score'] = $score;
